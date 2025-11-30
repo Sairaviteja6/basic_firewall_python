@@ -1,0 +1,11 @@
+{
+    "allowed_ports": [
+        80,
+        443,
+        22
+    ],
+    "blocked_ips": [],
+    "authenticated_ips": [
+        "10.0.2.15"
+    ]
+}

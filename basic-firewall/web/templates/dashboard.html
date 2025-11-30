@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firewall Dashboard</title>
+    <script>
+        function startEventStream() {
+            const eventSource = new EventSource("/events");
+            eventSource.onmessage = function(e) {
+                const logDiv = document.getElementById("log-feed");
+                const p = document.createElement("p");
+                p.textContent = e.data;
+                logDiv.prepend(p);  // newest on top
+            };
+        }
+        window.onload = startEventStream;
+    </script>
+</head>
+<body>
+    <h2>Welcome {{ current_user.id }}</h2>
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <h3>Firewall Rules</h3>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Rule Type</th>
+            <th>Value</th>
+        </tr>
+        {% for key, values in rules.items() %}
+            {% for val in values %}
+                <tr>
+                    <td>{{ key }}</td>
+                    <td>{{ val }}</td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+    </table>
+
+    <h3>Add Rule</h3>
+    <form action="{{ url_for('add_rule') }}" method="POST">
+        <select name="type">
+            <option value="allowed_ports">Allowed Port</option>
+            <option value="blocked_ips">Blocked IP</option>
+            <option value="authenticated_ips">Authenticated IP</option>
+        </select>
+        <input name="value" placeholder="Value" required>
+        <button type="submit">Add</button>
+    </form>
+
+    <h3>Remove Rule</h3>
+    <form action="{{ url_for('remove_rule') }}" method="POST">
+        <select name="type">
+            <option value="allowed_ports">Allowed Port</option>
+            <option value="blocked_ips">Blocked IP</option>
+            <option value="authenticated_ips">Authenticated IP</option>
+        </select>
+        <input name="value" placeholder="Value" required>
+        <button type="submit">Remove</button>
+    </form>
+
+    <h3>Live Firewall Events</h3>
+<div id="events" style="border:1px solid black; height:200px; overflow-y:scroll;"></div>
+
+<script>
+const eventSource = new EventSource("/events");
+const eventsDiv = document.getElementById("events");
+
+eventSource.onmessage = function(event) {
+    const p = document.createElement("p");
+    p.textContent = event.data;
+    eventsDiv.appendChild(p);
+    eventsDiv.scrollTop = eventsDiv.scrollHeight; // Auto-scroll
+};
+</script>
+
+</body>
+</html>
